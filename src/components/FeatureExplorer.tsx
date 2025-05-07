@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { agendamentoColetaFeature, consultaPontosFeature, gerenciamentoEntregasFeature } from "@/data/feature-examples";
+import { agendamentoColetaFeature, consultaPontosFeature, gerenciamentoEntregasFeature, cadastroPontosFeature } from "@/data/feature-examples";
 import StepDefinitionViewer from "./StepDefinitionViewer";
 import FeatureList from "./FeatureList";
 import { Feature } from "@/types/feature";
@@ -24,6 +24,12 @@ const features: Feature[] = [
     name: "Gerenciamento de entregas",
     description: "Cenários para gerenciamento do status das entregas",
     content: gerenciamentoEntregasFeature
+  },
+  {
+    id: "cadastro-pontos",
+    name: "Cadastro de pontos de coleta",
+    description: "Cenários para cadastro de novos pontos de coleta",
+    content: cadastroPontosFeature
   }
 ];
 

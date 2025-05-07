@@ -1,4 +1,3 @@
-
 export const agendamentoColetaFeature = `Feature: Agendamento de coletas sustentáveis
   Como um usuário do sistema Ecoleta
   Eu quero poder agendar coletas de resíduos
@@ -57,3 +56,29 @@ export const gerenciamentoEntregasFeature = `Feature: Gerenciamento de entregas
     Then o status da resposta deve ser 200
     And o status da coleta deve ser atualizado para "Finalizada"
     And um email de confirmação deve ser enviado ao usuário`;
+
+export const cadastroPontosFeature = `Feature: Cadastro de pontos de coleta
+  Como um administrador do sistema Ecoleta
+  Eu quero poder cadastrar novos pontos de coleta
+  Para que os usuários possam encontrar locais para descartar seus resíduos
+
+  Scenario: Cadastrar novo ponto de coleta com sucesso
+    Given que estou autenticado como administrador
+    And tenho os dados do ponto de coleta "EcoPonto Central"
+    And adiciono o material "Plástico" aos materiais aceitos
+    When envio uma solicitação POST para registrar o ponto de coleta
+    Then o status code da resposta deve ser 201
+    And o ponto de coleta "EcoPonto Central" deve estar cadastrado no sistema
+    And o ponto deve aceitar o material "Plástico"
+    
+  Scenario: Cadastrar ponto com diversos materiais
+    Given que estou autenticado como administrador
+    And tenho os dados do ponto de coleta "Reciclagem Total"
+    And adiciono o material "Metais" aos materiais aceitos
+    And adiciono o material "Óleo" aos materiais aceitos
+    And adiciono o material "Baterias" aos materiais aceitos
+    When envio uma solicitação POST para registrar o ponto de coleta
+    Then o status code da resposta deve ser 201
+    And o ponto deve aceitar o material "Metais"
+    And o ponto deve aceitar o material "Óleo"
+    And o ponto deve aceitar o material "Baterias"`;

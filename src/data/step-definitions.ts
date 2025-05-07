@@ -132,10 +132,24 @@ Given('que estou autenticado na API como administrador', async function () {
 Given('existe uma coleta com ID {string} com status {string}', async function (id, status) {
   coletaId = id;
   // Verificar se a coleta existe com o status esperado
-  const checkResponse = await axios.get(\`\${baseUrl}/coletas/\${id}\`, {
-    headers: { Authorization: \`Bearer \${authToken}\` }
-  });
-  expect(checkResponse.data.status).to.equal(status);
+  try {
+    const checkResponse = await axios.get(\`\${baseUrl}/coletas/\${id}\`, {
+      headers: { Authorization: \`Bearer \${authToken}\` }
+    });
+    expect(checkResponse.data.status).to.equal(status);
+  } catch (error) {
+    // Se a coleta não existe, criar uma nova para o teste
+    console.log(\`Coleta \${id} não encontrada, criando nova coleta...\`);
+    const createResponse = await axios.post(\`\${baseUrl}/coletas\`, {
+      id: id,
+      status: status,
+      endereco: "Rua de Teste, 123",
+      tipoMaterial: "Eletrônico"
+    }, {
+      headers: { Authorization: \`Bearer \${authToken}\` }
+    });
+    expect(createResponse.status).to.equal(201);
+  }
 });
 
 When('envio uma solicitação PATCH para {string} com o status {string}', async function (endpoint, novoStatus) {
@@ -146,10 +160,14 @@ When('envio uma solicitação PATCH para {string} com o status {string}', async 
     );
   } catch (error) {
     response = error.response;
+    console.error("Erro ao enviar requisição PATCH:", error.message);
   }
 });
 
 Then('o status da resposta deve ser {int}', function (statusCode) {
+  if (response.status !== statusCode) {
+    console.error(\`Status code esperado: \${statusCode}, mas recebido: \${response.status}. Response: \${JSON.stringify(response.data)}\`);
+  }
   expect(response.status).to.equal(statusCode);
 });
 
@@ -161,4 +179,68 @@ Then('um email de confirmação deve ser enviado ao usuário', function () {
   // Esta etapa pode exigir uma API mock para verificar o envio do email
   // ou uma verificação indireta através da API
   expect(response.data.emailEnviado).to.be.true;
+});`;
+
+// Adicionando uma nova definição de step para cadastro de pontos de coleta
+export const cadastroPontosSteps = `const { Given, When, Then } = require('@cucumber/cucumber');
+const axios = require('axios');
+const { expect } = require('chai');
+
+let authToken, response, requestData;
+const baseUrl = 'https://api.ecoleta-sustentavel.com/v1';
+
+Given('que estou autenticado como administrador', async function() {
+  // Implementação de autenticação para admin
+  const authResponse = await axios.post(\`\${baseUrl}/auth/login\`, {
+    email: 'admin@ecoleta.com',
+    senha: 'admin123'
+  });
+  authToken = authResponse.data.token;
+  expect(authToken).to.not.be.empty;
+});
+
+Given('tenho os dados do ponto de coleta {string}', function (nome) {
+  requestData = {
+    nome: nome,
+    endereco: "Rua Exemplo, 123, Centro",
+    materiaisAceitos: ["Eletrônico", "Vidro", "Papel"],
+    horarioFuncionamento: "Segunda a Sexta, 8h às 18h"
+  };
+});
+
+Given('adiciono o material {string} aos materiais aceitos', function (material) {
+  if (!requestData.materiaisAceitos.includes(material)) {
+    requestData.materiaisAceitos.push(material);
+  }
+});
+
+When('envio uma solicitação POST para registrar o ponto de coleta', async function () {
+  try {
+    response = await axios.post(\`\${baseUrl}/pontos\`, requestData, {
+      headers: { Authorization: \`Bearer \${authToken}\` }
+    });
+  } catch (error) {
+    response = error.response;
+    console.error("Erro ao cadastrar ponto de coleta:", JSON.stringify(error.response?.data || error.message));
+  }
+});
+
+Then('o status code da resposta deve ser {int}', function (statusCode) {
+  if (response.status !== statusCode) {
+    console.error(\`Status code esperado: \${statusCode}, mas recebido: \${response.status}. Response: \${JSON.stringify(response.data)}\`);
+  }
+  expect(response.status).to.equal(statusCode);
+});
+
+Then('o ponto de coleta {string} deve estar cadastrado no sistema', async function (nome) {
+  const verificacaoResponse = await axios.get(\`\${baseUrl}/pontos\`, {
+    headers: { Authorization: \`Bearer \${authToken}\` }
+  });
+  
+  const pontoEncontrado = verificacaoResponse.data.find(ponto => ponto.nome === nome);
+  expect(pontoEncontrado).to.not.be.undefined;
+});
+
+Then('o ponto deve aceitar o material {string}', function (material) {
+  expect(response.data.materiaisAceitos).to.include(material);
 });`;

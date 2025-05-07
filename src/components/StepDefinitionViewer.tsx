@@ -1,5 +1,5 @@
 
-import { agendamentoColetaSteps, consultaPontosSteps, gerenciamentoEntregasSteps } from "@/data/step-definitions";
+import { agendamentoColetaSteps, consultaPontosSteps, gerenciamentoEntregasSteps, cadastroPontosSteps } from "@/data/step-definitions";
 
 interface StepDefinitionViewerProps {
   featureId: string;
@@ -14,6 +14,8 @@ const StepDefinitionViewer = ({ featureId }: StepDefinitionViewerProps) => {
         return consultaPontosSteps;
       case "gerenciamento-entregas":
         return gerenciamentoEntregasSteps;
+      case "cadastro-pontos":
+        return cadastroPontosSteps;
       default:
         return "";
     }
